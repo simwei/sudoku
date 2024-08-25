@@ -9,10 +9,17 @@ import {
   BoardData,
   CellData,
   CellPosition,
+  getBlockIdentifier,
   RowData,
   RowPosition,
 } from "../scheme/BoardData";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { FocusContext } from "./Sudoku";
+
+const colors = {
+  focus: "#d0d0d0",
+  secondaryFocus: "#e7e7e7",
+};
 
 export const Board = (props: { board: BoardData }) => {
   const dimensions = useWindowDimensions();
@@ -57,11 +64,39 @@ const Row = (props: {
   );
 };
 
+const useIsFocused = (position: CellPosition) => {
+  const focusPosition = useContext(FocusContext);
+  return (
+    focusPosition !== undefined &&
+    focusPosition.columnId === position.columnId &&
+    focusPosition.rowId === position.rowId
+  );
+};
+
+const useIsSecondaryFocused = (position: CellPosition) => {
+  const focusPosition = useContext(FocusContext);
+  return (
+    focusPosition !== undefined &&
+    (focusPosition.columnId === position.columnId ||
+      focusPosition.rowId === position.rowId ||
+      getBlockIdentifier(focusPosition) === getBlockIdentifier(position))
+  );
+};
+
 const Cell = (props: {
   cell: CellData;
   position: CellPosition;
   dimensions: { height: number; width: number };
 }) => {
+  const isFocused = useIsFocused(props.position);
+  const isSecondaryFocused = useIsSecondaryFocused(props.position);
+
+  const backgroundColor = isFocused
+    ? colors.focus
+    : isSecondaryFocused
+    ? colors.secondaryFocus
+    : undefined;
+
   const [editable] = useState(props.cell.isInitial === false);
 
   const { outerBorderStyle, innerBorderStyle } = borderStyle(
@@ -70,7 +105,7 @@ const Cell = (props: {
   );
 
   return (
-    <View style={[outerBorderStyle, props.dimensions]}>
+    <View style={[outerBorderStyle, props.dimensions, { backgroundColor }]}>
       <View
         style={[
           innerBorderStyle,

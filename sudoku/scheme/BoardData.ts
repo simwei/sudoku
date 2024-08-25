@@ -17,6 +17,63 @@ const blockIdentifiers = [
 ] as const;
 type BlockIdentifier = (typeof blockIdentifiers)[number];
 
+export function getBlockIdentifier(position: CellPosition) {
+  switch (position.rowId) {
+    case 0:
+    case 1:
+    case 2:
+      switch (position.columnId) {
+        case 0:
+        case 1:
+        case 2:
+          return "tl"
+        case 3:
+        case 4:
+        case 5:
+          return "tc"
+        case 6:
+        case 7:
+        case 8:
+          return "tr"
+      }
+    case 3:
+    case 4:
+    case 5:
+      switch (position.columnId) {
+        case 0:
+        case 1:
+        case 2:
+          return "cl"
+        case 3:
+        case 4:
+        case 5:
+          return "cc"
+        case 6:
+        case 7:
+        case 8:
+          return "cr"
+      }
+    case 6:
+    case 7:
+    case 8:
+      switch (position.columnId) {
+        case 0:
+        case 1:
+        case 2:
+          return "bl"
+        case 3:
+        case 4:
+        case 5:
+          return "bc"
+        case 6:
+        case 7:
+        case 8:
+          return "br"
+      }
+  }
+  throw Error(`invalid Position ${JSON.stringify(position)}`)
+}
+
 const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
 export type Digit = (typeof digits)[number];
 
