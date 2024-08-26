@@ -21,8 +21,12 @@
       }
     },
     "web": {
+      "bundler": "metro",
+      "output": "static",
       "favicon": "./assets/favicon.png"
     },
-    "jsEngine": "hermes"
+    "jsEngine": "hermes",
+    "plugins": ["expo-router"],
+    "scheme": "com.simwei.sudoku"
   }
 }

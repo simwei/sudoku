@@ -1,9 +1,4 @@
-import {
-  BoardData,
-  CellData,
-  isDigit,
-  RowData,
-} from "../scheme/BoardData";
+import { BoardData, CellData, isDigit, RowData } from "../scheme/BoardData";
 
 export function createSampleBoard(): BoardData {
   const data: { [row in number]?: { [col in number]?: number } } = {
@@ -27,18 +22,17 @@ export function createSampleBoard(): BoardData {
 
       if (isDigit(value) || value === undefined) {
         const isInitial = isDigit(value);
-        const cell: CellData = { value, isInitial }
+        const cell: CellData = { value, isInitial };
         cells.push(cell);
-        continue
+        continue;
       }
 
       throw Error(
         `${value} on position (${rowId}, ${columnId}) is not a valid digit)`
       );
-
     }
 
-    rows.push({cells})
+    rows.push({ cells });
   }
-  return {rows};
+  return { rows };
 }

@@ -1,35 +1,23 @@
-import {
-  Text,
-  View,
-  useWindowDimensions,
-  ViewStyle,
-  Platform,
-} from "react-native";
+import { useState } from "react";
+import { Text, View, ViewStyle } from "react-native";
+import { useBackgroundColor } from "../../colors";
+import { useFocusContext } from "../../focus/FocusContext";
 import {
   BoardData,
   CellData,
   CellPosition,
-  getBlockIdentifier,
   RowData,
   RowPosition,
-} from "../scheme/BoardData";
-import { useState } from "react";
-import { useFocusContext } from "./Sudoku";
+} from "../../scheme/BoardData";
+import { useTargetBoardWidth } from "../useTargetBoardWidth";
 
-const colors = {
-  focus: "#d0d0d0",
-  secondaryFocus: "#e7e7e7",
-};
-
-export const Board = (props: { board: BoardData }) => {
-  const dimensions = useWindowDimensions();
-  const minWindowDimension = Math.min(dimensions.height, dimensions.width);
-  const targetBoardDimension = minWindowDimension * 0.9;
+export const DOMBoard = (props: { board: BoardData }) => {
+  const targetBoardDimension = useTargetBoardWidth();
 
   return (
     <View style={{ width: targetBoardDimension, height: targetBoardDimension }}>
       {props.board.rows.map((row, rowId) => (
-        <Row
+        <DOMRow
           position={{ rowId }}
           row={row}
           key={rowId}
@@ -42,7 +30,7 @@ export const Board = (props: { board: BoardData }) => {
   );
 };
 
-const Row = (props: {
+const DOMRow = (props: {
   row: RowData;
   position: RowPosition;
   dimensions: { height: number };
@@ -50,7 +38,7 @@ const Row = (props: {
   return (
     <View style={[{ flexDirection: "row" }, props.dimensions]}>
       {props.row.cells.map((cell, columnId) => (
-        <Cell
+        <DOMCell
           position={{ ...props.position, columnId }}
           cell={cell}
           key={columnId}
@@ -64,29 +52,13 @@ const Row = (props: {
   );
 };
 
-const Cell = (props: {
+const DOMCell = (props: {
   cell: CellData;
   position: CellPosition;
   dimensions: { height: number; width: number };
 }) => {
-  const { focus, setFocus } = useFocusContext();
-
-  const isFocused =
-    focus !== undefined &&
-    focus.columnId === props.position.columnId &&
-    focus.rowId === props.position.rowId;
-
-  const isSecondaryFocused =
-    focus !== undefined &&
-    (focus.columnId === props.position.columnId ||
-      focus.rowId === props.position.rowId ||
-      getBlockIdentifier(focus) === getBlockIdentifier(props.position));
-
-  const backgroundColor = isFocused
-    ? colors.focus
-    : isSecondaryFocused
-    ? colors.secondaryFocus
-    : undefined;
+  const { setFocus } = useFocusContext();
+  const backgroundColor = useBackgroundColor(props.position);
 
   const [editable] = useState(props.cell.isInitial === false);
 
