@@ -13,8 +13,8 @@ import {
   RowData,
   RowPosition,
 } from "../scheme/BoardData";
-import { useContext, useState } from "react";
-import { FocusContext } from "./Sudoku";
+import { useState } from "react";
+import { useFocusContext } from "./Sudoku";
 
 const colors = {
   focus: "#d0d0d0",
@@ -64,32 +64,23 @@ const Row = (props: {
   );
 };
 
-const useIsFocused = (position: CellPosition) => {
-  const focusPosition = useContext(FocusContext);
-  return (
-    focusPosition !== undefined &&
-    focusPosition.columnId === position.columnId &&
-    focusPosition.rowId === position.rowId
-  );
-};
-
-const useIsSecondaryFocused = (position: CellPosition) => {
-  const focusPosition = useContext(FocusContext);
-  return (
-    focusPosition !== undefined &&
-    (focusPosition.columnId === position.columnId ||
-      focusPosition.rowId === position.rowId ||
-      getBlockIdentifier(focusPosition) === getBlockIdentifier(position))
-  );
-};
-
 const Cell = (props: {
   cell: CellData;
   position: CellPosition;
   dimensions: { height: number; width: number };
 }) => {
-  const isFocused = useIsFocused(props.position);
-  const isSecondaryFocused = useIsSecondaryFocused(props.position);
+  const { focus, setFocus } = useFocusContext();
+
+  const isFocused =
+    focus !== undefined &&
+    focus.columnId === props.position.columnId &&
+    focus.rowId === props.position.rowId;
+
+  const isSecondaryFocused =
+    focus !== undefined &&
+    (focus.columnId === props.position.columnId ||
+      focus.rowId === props.position.rowId ||
+      getBlockIdentifier(focus) === getBlockIdentifier(props.position));
 
   const backgroundColor = isFocused
     ? colors.focus
@@ -105,7 +96,11 @@ const Cell = (props: {
   );
 
   return (
-    <View style={[outerBorderStyle, props.dimensions, { backgroundColor }]}>
+    <View
+      style={[outerBorderStyle, props.dimensions, { backgroundColor }]}
+      onTouchStart={() => setFocus(props.position)}
+      onPointerDown={() => setFocus(props.position)}
+    >
       <View
         style={[
           innerBorderStyle,
