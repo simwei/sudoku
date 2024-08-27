@@ -22,7 +22,10 @@ export function createSampleBoard(): BoardData {
 
       if (isDigit(value) || value === undefined) {
         const isInitial = isDigit(value);
-        const cell: CellData = { value, isInitial };
+        const cell: CellData = {
+          value,
+          type: isInitial ? "given" : "editable",
+        };
         cells.push(cell);
         continue;
       }

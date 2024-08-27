@@ -26,16 +26,17 @@ export function getBlockIdentifier(position: CellPosition) {
         case 0:
         case 1:
         case 2:
-          return "tl"
+          return "tl";
         case 3:
         case 4:
         case 5:
-          return "tc"
+          return "tc";
         case 6:
         case 7:
         case 8:
-          return "tr"
+          return "tr";
       }
+      break;
     case 3:
     case 4:
     case 5:
@@ -43,16 +44,17 @@ export function getBlockIdentifier(position: CellPosition) {
         case 0:
         case 1:
         case 2:
-          return "cl"
+          return "cl";
         case 3:
         case 4:
         case 5:
-          return "cc"
+          return "cc";
         case 6:
         case 7:
         case 8:
-          return "cr"
+          return "cr";
       }
+      break;
     case 6:
     case 7:
     case 8:
@@ -60,18 +62,18 @@ export function getBlockIdentifier(position: CellPosition) {
         case 0:
         case 1:
         case 2:
-          return "bl"
+          return "bl";
         case 3:
         case 4:
         case 5:
-          return "bc"
+          return "bc";
         case 6:
         case 7:
         case 8:
-          return "br"
+          return "br";
       }
   }
-  throw Error(`invalid Position ${JSON.stringify(position)}`)
+  throw Error(`invalid Position ${JSON.stringify(position)}`);
 }
 
 const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
@@ -83,7 +85,7 @@ export function isDigit(value: any): value is Digit {
 
 export interface CellData {
   value?: Digit;
-  isInitial: boolean;
+  type: "given" | "editable";
 }
 
 export interface CellPosition {

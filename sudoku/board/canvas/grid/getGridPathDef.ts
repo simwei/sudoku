@@ -5,13 +5,13 @@ import {
   globalXMargin,
   globalYMargin,
 } from "../geometry/consts";
-import { useMinMaxGridCoordinates } from "./useMinMaxGridCoordinates";
+import { getMinMaxGridCoordinates } from "./getMinMaxGridCoordinates";
 
-export const useGridPathDef = (
+export const getGridPathDef = (
   xIndices: number[],
   yIndices: number[]
 ): SkPath => {
-  const { minX, maxX, minY, maxY } = useMinMaxGridCoordinates();
+  const { minX, maxX, minY, maxY } = getMinMaxGridCoordinates();
   const path: SkPath = Skia.Path.Make();
 
   for (const xIndex of xIndices) {

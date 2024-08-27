@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Text, View, ViewStyle } from "react-native";
 import { useBackgroundColor } from "../../colors";
 import { useFocusContext } from "../../focus/FocusContext";
@@ -19,7 +18,7 @@ export const DOMBoard = (props: { board: BoardData }) => {
       {props.board.rows.map((row, rowId) => (
         <DOMRow
           position={{ rowId }}
-          row={row}
+          rowData={row}
           key={rowId}
           dimensions={{
             height: targetBoardDimension / props.board.rows.length,
@@ -31,16 +30,16 @@ export const DOMBoard = (props: { board: BoardData }) => {
 };
 
 const DOMRow = (props: {
-  row: RowData;
+  rowData: RowData;
   position: RowPosition;
   dimensions: { height: number };
 }) => {
   return (
     <View style={[{ flexDirection: "row" }, props.dimensions]}>
-      {props.row.cells.map((cell, columnId) => (
+      {props.rowData.cells.map((cell, columnId) => (
         <DOMCell
           position={{ ...props.position, columnId }}
-          cell={cell}
+          cellData={cell}
           key={columnId}
           dimensions={{
             height: props.dimensions.height,
@@ -53,14 +52,12 @@ const DOMRow = (props: {
 };
 
 const DOMCell = (props: {
-  cell: CellData;
+  cellData: CellData;
   position: CellPosition;
   dimensions: { height: number; width: number };
 }) => {
   const { setFocus } = useFocusContext();
   const backgroundColor = useBackgroundColor(props.position);
-
-  const [editable] = useState(props.cell.isInitial === false);
 
   const { outerBorderStyle, innerBorderStyle } = borderStyle(
     props.position,
@@ -87,7 +84,9 @@ const DOMCell = (props: {
       >
         <Text
           style={[
-            editable ? { color: "gray" } : { color: "black" },
+            props.cellData.type === "editable"
+              ? { color: "gray" }
+              : { color: "black" },
             {
               // TODO: text alignment is wonky between android and web
               fontSize: props.dimensions.height * 0.8,
@@ -95,7 +94,7 @@ const DOMCell = (props: {
             },
           ]}
         >
-          {props.cell.value}
+          {props.cellData.value}
         </Text>
       </View>
     </View>

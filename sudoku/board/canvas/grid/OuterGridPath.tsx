@@ -4,10 +4,10 @@ import {
   totalHeight,
   totalWidth,
 } from "../geometry/consts";
-import { useMinMaxGridCoordinates } from "./useMinMaxGridCoordinates";
+import { getMinMaxGridCoordinates } from "./getMinMaxGridCoordinates";
 
 export const OuterGridPath = () => {
-  const { minX, minY } = useMinMaxGridCoordinates();
+  const { minX, minY } = getMinMaxGridCoordinates();
 
   return (
     <Rect

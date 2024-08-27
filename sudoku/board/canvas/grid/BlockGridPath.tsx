@@ -1,9 +1,9 @@
 import { Path } from "@shopify/react-native-skia";
 import { blockGridStrokeWidth } from "../geometry/consts";
-import { useGridPathDef } from "./useGridPathDef";
+import { getGridPathDef } from "./getGridPathDef";
 
 export const BlockGridPath = () => {
-  const pathDef = useGridPathDef([3, 6], [3, 6]);
+  const pathDef = getGridPathDef([3, 6], [3, 6]);
   return (
     <Path path={pathDef} style={"stroke"} strokeWidth={blockGridStrokeWidth} />
   );

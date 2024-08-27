@@ -7,84 +7,106 @@ import {
   useTouchHandler,
 } from "@shopify/react-native-skia";
 import { useContextBridge } from "its-fine";
+import { useContext } from "react";
 import { useBackgroundColor } from "../../colors";
 import { useFocusContext } from "../../focus/FocusContext";
 import { useFontManager } from "../../font/FontContext";
-import { BoardData, CellData, CellPosition } from "../../scheme/BoardData";
+import { BoardData } from "../../scheme/BoardData";
 import { useTargetBoardWidth } from "../useTargetBoardWidth";
 import {
-  getCellGeometry,
-  useGetPosition,
-  useGetSourcePoint,
-  withCellGeometryProvider,
-} from "./geometry/CellGeometryContext";
+  Cell,
+  CellsContext,
+  CellsProvider,
+  getCellPosition,
+} from "./CellContext";
 import { canvasMainFontSize } from "./geometry/consts";
-import { Scaler } from "./geometry/Scaler";
 import { BlockGridPath } from "./grid/BlockGridPath";
 import { InnerGridPath } from "./grid/InnerGridPath";
 import { OuterGridPath } from "./grid/OuterGridPath";
+import {
+  getVirtualViewport,
+  translateViewport,
+  useRenderViewport,
+  ViewportScaler,
+} from "./ViewportScaler";
 
-const useOnTouch = () => {
-  const getSourcePoint = useGetSourcePoint();
-  const getCellPosition = useGetPosition();
+export const CanvasBoard = (props: { board: BoardData }) => {
+  return (
+    <CellsProvider {...props}>
+      <CanvasManager />
+    </CellsProvider>
+  );
+};
+
+const CanvasManager = () => {
+  const ContextBridge = useContextBridge();
+
+  const targetBoardDimension = useTargetBoardWidth();
+  const renderViewport = useRenderViewport();
+  const virtualViewport = getVirtualViewport();
+
+  const cells = useContext(CellsContext);
+
   const { setFocus } = useFocusContext();
 
   const onTouch = useTouchHandler(
     {
-      onStart: (e) => {
-        const cellPosition = getCellPosition(getSourcePoint(e));
+      onStart: (touchInfo) => {
+        const cellPosition = getCellPosition(
+          cells,
+          translateViewport(touchInfo, renderViewport, virtualViewport)
+        );
         setFocus(cellPosition);
       },
     },
-    [getSourcePoint, getCellPosition, setFocus]
+    [setFocus, renderViewport, cells] // CAUTION: deps not supported by eslint
   );
 
-  return onTouch;
+  return (
+    <Canvas
+      style={{
+        width: targetBoardDimension,
+        height: targetBoardDimension,
+      }}
+      onTouch={onTouch}
+    >
+      <ViewportScaler>
+        <ContextBridge>
+          <BoardComponent />
+        </ContextBridge>
+      </ViewportScaler>
+    </Canvas>
+  );
 };
 
-export const CanvasBoard = withCellGeometryProvider(
-  (props: { board: BoardData }) => {
-    const ContextBridge = useContextBridge();
+const BoardComponent = () => {
+  const cells = useContext(CellsContext);
 
-    const targetBoardDimension = useTargetBoardWidth();
-    const onTouch = useOnTouch();
+  return (
+    <>
+      {cells.map((cell) => (
+        <CellComponent
+          {...cell}
+          key={`${cell.position.rowId}-${cell.position.columnId}`}
+        />
+      ))}
 
-    return (
-      <Canvas
-        style={{
-          width: targetBoardDimension,
-          height: targetBoardDimension,
-        }}
-        onTouch={onTouch}
-      >
-        <ContextBridge>
-          <Scaler>
-            {props.board.rows.map((row, rowId) =>
-              row.cells.map((cell, columnId) => (
-                <CanvasCell
-                  cell={cell}
-                  position={{ rowId, columnId }}
-                  key={`${rowId}-${columnId}`}
-                />
-              ))
-            )}
-            <InnerGridPath />
-            <BlockGridPath />
-            <OuterGridPath />
-          </Scaler>
-        </ContextBridge>
-      </Canvas>
-    );
-  }
-);
+      <InnerGridPath />
+      <BlockGridPath />
+      <OuterGridPath />
+    </>
+  );
+};
 
-const CanvasCell = (props: { cell: CellData; position: CellPosition }) => {
+const CellComponent = (props: Cell) => {
   const customFontMgr = useFontManager();
   const backgroundColor = useBackgroundColor(props.position);
 
-  const cellGeometry = getCellGeometry(props.position);
   const textStyle = {
-    color: Skia.Color("black"),
+    color:
+      props.cellData.type === "editable"
+        ? Skia.Color("gray")
+        : Skia.Color("black"),
     fontFamilies: ["Varela"],
     fontSize: canvasMainFontSize,
   };
@@ -94,14 +116,14 @@ const CanvasCell = (props: { cell: CellData; position: CellPosition }) => {
     customFontMgr
   )
     .pushStyle(textStyle)
-    .addText(props.cell.value?.toString() || "")
+    .addText(props.cellData.value?.toString() || "")
     .pop()
     .build();
 
   return (
     <>
-      <Rect {...cellGeometry} color={backgroundColor}></Rect>
-      <Paragraph {...cellGeometry} paragraph={paragraph} />
+      <Rect {...props.geometry} color={backgroundColor} />
+      <Paragraph {...props.geometry} paragraph={paragraph} />
     </>
   );
 };

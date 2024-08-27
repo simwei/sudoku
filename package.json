@@ -4,8 +4,8 @@
   "main": "index",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "postinstall": "setup-skia-web"
   },
@@ -28,8 +28,33 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
+    "@eslint/js": "^9.9.1",
+    "@react-native/eslint-config": "^0.75.2",
     "@types/react": "~18.2.45",
-    "typescript": "~5.3.3"
+    "eslint": "^8.57.0",
+    "eslint-plugin-jest": "^28.8.0",
+    "eslint-plugin-react": "^7.35.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-native": "^4.1.0",
+    "globals": "^15.9.0",
+    "typescript": "~5.3.3",
+    "typescript-eslint": "^8.3.0"
   },
-  "private": true
+  "private": true,
+  "eslintConfig": {
+    "plugins": [
+      "react-hooks"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "rules": {
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "error",
+      "quotes": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "react/react-in-jsx-scope": "off",
+      "no-shadow": "off",
+      "react-native/no-inline-styles": "off",
+      "no-array-constructor": "off"
+    }
+  }
 }
