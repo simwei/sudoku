@@ -27,7 +27,15 @@
       "favicon": "./assets/favicon.png"
     },
     "jsEngine": "hermes",
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router",
+      [
+        "expo-font",
+        {
+          "fonts": ["sudoku/font/varela/Varela-Regular.ttf"]
+        }
+      ]
+    ],
     "scheme": "com.simwei.sudoku"
   }
 }

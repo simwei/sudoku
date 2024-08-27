@@ -14,7 +14,7 @@ export const useFontManager = () => {
 
 export const FontManagerProvider = (props: PropsWithChildren) => {
   const fontManager = useFonts({
-    Varela: [require("./varela/Varela-Regular.ttf")],
+    Varela: [require("../../assets/fonts/Varela-Regular.ttf")],
   });
 
   if (!fontManager) {

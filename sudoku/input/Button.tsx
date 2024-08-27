@@ -9,7 +9,7 @@ export const NumberButton = (props: { num: Digit }) => {
   const { updateCellData } = useContext(CellsContext);
   const { focus } = useFocusContext();
 
-  const textStyle: TextStyle = { fontSize: 30 };
+  const textStyle: TextStyle = { fontSize: 30, fontFamily: "Varela" };
 
   const buttonStyle: ViewStyle = {
     borderRadius: 4,
