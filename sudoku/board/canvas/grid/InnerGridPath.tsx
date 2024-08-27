@@ -1,4 +1,6 @@
 import { Path } from "@shopify/react-native-skia";
+import React from "react";
+import { colors } from "../../../colors";
 import { innerGridStrokeWidth } from "../geometry/consts";
 import { getGridPathDef } from "./getGridPathDef";
 
@@ -9,7 +11,7 @@ export const InnerGridPath = () => {
     <Path
       path={pathDef}
       style={"stroke"}
-      color={"grey"}
+      color={colors.innerBorderColor}
       strokeWidth={innerGridStrokeWidth}
     />
   );

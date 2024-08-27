@@ -1,4 +1,4 @@
-import { PropsWithChildren, createContext, useCallback, useState } from "react";
+import React, { PropsWithChildren, createContext } from "react";
 import { useImmer } from "use-immer";
 import {
   BoardData,
@@ -61,10 +61,7 @@ export const CellsProvider = (
       return;
     }
 
-    console.log("setCellsCallback");
     setCells((oldCells) => {
-      console.log("setCells");
-
       oldCells[foundIndex].cellData.value = update;
     });
   };

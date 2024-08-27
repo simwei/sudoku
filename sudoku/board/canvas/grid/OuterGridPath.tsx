@@ -1,4 +1,5 @@
 import { Rect } from "@shopify/react-native-skia";
+import React from "react";
 import {
   outerGridStrokeWidth,
   totalHeight,

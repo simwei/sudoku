@@ -1,4 +1,5 @@
 import { Path } from "@shopify/react-native-skia";
+import React from "react";
 import { blockGridStrokeWidth } from "../geometry/consts";
 import { getGridPathDef } from "./getGridPathDef";
 

@@ -1,5 +1,5 @@
-import { useContext } from "react";
-import { Pressable, Text, View } from "react-native";
+import React, { useContext } from "react";
+import { Pressable, Text, TextStyle, ViewStyle } from "react-native";
 import { CellsContext } from "../board/canvas/CellContext";
 import { colors } from "../colors";
 import { useFocusContext } from "../focus/FocusContext";
@@ -8,28 +8,30 @@ import { Digit } from "../scheme/BoardData";
 export const NumberButton = (props: { num: Digit }) => {
   const { updateCellData } = useContext(CellsContext);
   const { focus } = useFocusContext();
-  console.log("render", props);
+
+  const textStyle: TextStyle = { fontSize: 30 };
+
+  const buttonStyle: ViewStyle = {
+    borderRadius: 4,
+    aspectRatio: 1,
+    height: 60,
+    justifyContent: "center",
+    alignItems: "center",
+  };
+
   return (
     <Pressable
       style={({ pressed }) => [
-        {
-          backgroundColor: pressed ? colors.buttonPressed : colors.button,
-        },
-        {
-          borderRadius: 4,
-          aspectRatio: 1,
-          height: 60,
-        },
-        {
-          justifyContent: "center",
-          alignItems: "center",
-        },
+        buttonStyle,
+        { backgroundColor: pressed ? colors.buttonPressed : colors.button },
       ]}
-      onPress={(e) => {
-        if (focus) updateCellData(focus, props.num);
+      onPress={(_) => {
+        if (focus) {
+          updateCellData(focus, props.num);
+        }
       }}
     >
-      <Text style={[{ fontSize: 30 }]}>{props.num.toString()}</Text>
+      <Text style={textStyle}>{props.num.toString()}</Text>
     </Pressable>
   );
 };

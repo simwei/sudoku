@@ -7,7 +7,8 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "postinstall": "setup-skia-web"
+    "postinstall": "setup-skia-web",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@expo/metro-runtime": "~3.2.3",
@@ -54,15 +55,7 @@
     ],
     "parser": "@typescript-eslint/parser",
     "rules": {
-      "react-hooks/rules-of-hooks": "error",
-      "react-hooks/exhaustive-deps": "error",
-      "quotes": "off",
-      "@typescript-eslint/no-unused-vars": "off",
-      "react/react-in-jsx-scope": "off",
-      "no-shadow": "off",
-      "react-native/no-inline-styles": "off",
-      "no-array-constructor": "off",
-      "no-direct-mutation-state": "warn"
+      "quotes": "off"
     }
   }
 }

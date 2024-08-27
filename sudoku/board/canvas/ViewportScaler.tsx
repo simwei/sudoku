@@ -1,5 +1,5 @@
 import { FitBox, rect, SkHostRect } from "@shopify/react-native-skia";
-import { PropsWithChildren } from "react";
+import React, { PropsWithChildren } from "react";
 import { useTargetBoardWidth } from "../useTargetBoardWidth";
 import {
   cellHeight,

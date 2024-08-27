@@ -2,10 +2,16 @@ import { useFocusContext } from "../focus/FocusContext";
 import { CellPosition, getBlockIdentifier } from "../scheme/BoardData";
 
 export const colors = {
+  noFocus: "#ffffff",
   focus: "#d0d0d0",
   secondaryFocus: "#e7e7e7",
   button: "#e7e7e7",
   buttonPressed: "#d0d0d0",
+  editableText: "gray",
+  givenText: "black",
+  innerBorderColor: "gray",
+  outerBorderColor: "black",
+  blockBorderColor: "black",
 };
 
 export function useBackgroundColor(position: CellPosition) {
@@ -26,7 +32,7 @@ export function useBackgroundColor(position: CellPosition) {
     ? colors.focus
     : isSecondaryFocused
       ? colors.secondaryFocus
-      : "#ffffff";
+      : colors.noFocus;
 
   return backgroundColor;
 }

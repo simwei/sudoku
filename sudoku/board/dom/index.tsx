@@ -1,5 +1,6 @@
+import React from "react";
 import { Text, View, ViewStyle } from "react-native";
-import { useBackgroundColor } from "../../colors";
+import { colors, useBackgroundColor } from "../../colors";
 import { useFocusContext } from "../../focus/FocusContext";
 import {
   BoardData,
@@ -34,8 +35,9 @@ const DOMRow = (props: {
   position: RowPosition;
   dimensions: { height: number };
 }) => {
+  const style: ViewStyle = { flexDirection: "row" };
   return (
-    <View style={[{ flexDirection: "row" }, props.dimensions]}>
+    <View style={[style, props.dimensions]}>
       {props.rowData.cells.map((cell, columnId) => (
         <DOMCell
           position={{ ...props.position, columnId }}
@@ -64,34 +66,33 @@ const DOMCell = (props: {
     props.dimensions.height * 0.02
   );
 
+  const viewStyle: ViewStyle = {
+    height: "100%",
+    width: "100%",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  };
+
+  const textStyle = {
+    // TODO: text alignment is wonky between android and web
+    fontSize: props.dimensions.height * 0.8,
+    includeFontPadding: false,
+  };
+
   return (
     <View
       style={[outerBorderStyle, props.dimensions, { backgroundColor }]}
       onTouchStart={() => setFocus(props.position)}
       onPointerDown={() => setFocus(props.position)}
     >
-      <View
-        style={[
-          innerBorderStyle,
-          {
-            height: "100%",
-            width: "100%",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          },
-        ]}
-      >
+      <View style={[innerBorderStyle, viewStyle]}>
         <Text
           style={[
             props.cellData.type === "editable"
-              ? { color: "gray" }
-              : { color: "black" },
-            {
-              // TODO: text alignment is wonky between android and web
-              fontSize: props.dimensions.height * 0.8,
-              includeFontPadding: false,
-            },
+              ? { color: colors.givenText }
+              : { color: colors.editableText },
+            textStyle,
           ]}
         >
           {props.cellData.value}
@@ -103,7 +104,7 @@ const DOMCell = (props: {
 
 const borderStyle = (coordinates: CellPosition, baseBorderWidth: number) => {
   const borderWidth = baseBorderWidth;
-  const borderColor = "grey";
+  const borderColor = colors.innerBorderColor;
 
   const innerBorderStyle: ViewStyle = {
     borderLeftWidth: borderWidth,
@@ -117,10 +118,10 @@ const borderStyle = (coordinates: CellPosition, baseBorderWidth: number) => {
   };
 
   const separatorWidth = 2 * baseBorderWidth;
-  const separatorColor = "black";
+  const separatorColor = colors.blockBorderColor;
 
   const edgeBorderWidth = 2 * separatorWidth;
-  const edgeBorderColor = "black";
+  const edgeBorderColor = colors.outerBorderColor;
 
   const outerBorderStyle: ViewStyle = {};
 

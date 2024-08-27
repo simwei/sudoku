@@ -7,18 +7,12 @@ import {
   useTouchHandler,
 } from "@shopify/react-native-skia";
 import { useContextBridge } from "its-fine";
-import { useContext } from "react";
-import { useBackgroundColor } from "../../colors";
+import React, { useContext } from "react";
+import { colors, useBackgroundColor } from "../../colors";
 import { useFocusContext } from "../../focus/FocusContext";
 import { useFontManager } from "../../font/FontContext";
-import { BoardData } from "../../scheme/BoardData";
 import { useTargetBoardWidth } from "../useTargetBoardWidth";
-import {
-  Cell,
-  CellsContext,
-  CellsProvider,
-  getCellPosition,
-} from "./CellContext";
+import { Cell, CellsContext, getCellPosition } from "./CellContext";
 import { canvasMainFontSize } from "./geometry/consts";
 import { BlockGridPath } from "./grid/BlockGridPath";
 import { InnerGridPath } from "./grid/InnerGridPath";
@@ -58,7 +52,6 @@ const CanvasManager = () => {
     [setFocus, renderViewport, cells] // CAUTION: deps not supported by eslint
   );
 
-  console.log("update Canvas");
   return (
     <Canvas
       style={{
@@ -102,8 +95,8 @@ const CellComponent = (props: Cell) => {
   const textStyle = {
     color:
       props.cellData.type === "editable"
-        ? Skia.Color("gray")
-        : Skia.Color("black"),
+        ? Skia.Color(colors.editableText)
+        : Skia.Color(colors.givenText),
     fontFamilies: ["Varela"],
     fontSize: canvasMainFontSize,
   };

@@ -1,5 +1,5 @@
 import { SkTypefaceFontProvider, useFonts } from "@shopify/react-native-skia";
-import { PropsWithChildren, createContext, useContext } from "react";
+import React, { PropsWithChildren, createContext, useContext } from "react";
 import { ActivityIndicator } from "react-native";
 
 const FontManagerContext = createContext<SkTypefaceFontProvider | null>(null);

@@ -1,9 +1,3 @@
-const columnIdentifiers = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
-type ColumnIdentifier = (typeof columnIdentifiers)[number];
-
-const rowIdentifiers = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
-type RowIdentifier = (typeof rowIdentifiers)[number];
-
 const blockIdentifiers = [
   "tl",
   "tc",
@@ -17,7 +11,7 @@ const blockIdentifiers = [
 ] as const;
 type BlockIdentifier = (typeof blockIdentifiers)[number];
 
-export function getBlockIdentifier(position: CellPosition) {
+export function getBlockIdentifier(position: CellPosition): BlockIdentifier {
   switch (position.rowId) {
     case 0:
     case 1:

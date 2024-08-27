@@ -1,7 +1,7 @@
 import { BoardData, CellData, isDigit, RowData } from "../scheme/BoardData";
 
 export function createSampleBoard(): BoardData {
-  const data: { [row in number]?: { [col in number]?: number } } = {
+  const data: { [row: number]: { [col: number]: number } } = {
     1: { 1: 1, 2: 7, 6: 4 },
     2: { 1: 8, 6: 6, 8: 3 },
     3: { 6: 1, 9: 5 },
@@ -13,9 +13,9 @@ export function createSampleBoard(): BoardData {
     9: { 5: 3, 7: 6, 9: 2 },
   };
 
-  const rows = new Array<RowData>();
+  const rows: Array<RowData> = [];
   for (let rowId of [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
-    const cells = new Array<CellData>();
+    const cells: Array<CellData> = [];
 
     for (let columnId of [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
       const value = data[rowId]?.[columnId];
