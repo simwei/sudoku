@@ -1,5 +1,11 @@
-import { PropsWithChildren, createContext } from "react";
-import { BoardData, CellData, CellPosition } from "../../scheme/BoardData";
+import { PropsWithChildren, createContext, useCallback, useState } from "react";
+import { useImmer } from "use-immer";
+import {
+  BoardData,
+  CellData,
+  CellPosition,
+  Digit,
+} from "../../scheme/BoardData";
 import {
   cellHeight,
   cellWidth,
@@ -22,15 +28,49 @@ export type Cell = {
 
 type Cells = Cell[];
 
-export const CellsContext = createContext<Cells>([]);
+type UpdateCellDataFn = (position: CellPosition, update: UpdateValue) => void;
+
+type UpdateValue = Digit | undefined;
+
+export const CellsContext = createContext<{
+  cells: Cells;
+  updateCellData: UpdateCellDataFn;
+}>({ cells: [], updateCellData: () => {} });
 
 export const CellsProvider = (
   props: PropsWithChildren & { board: BoardData }
 ) => {
-  const cells = buildCells(props.board);
+  const [cells, setCells] = useImmer(buildCells(props.board));
+
+  const updateCellData = (position: CellPosition, update: UpdateValue) => {
+    const foundIndex = cells.findIndex(
+      (cell) =>
+        cell.position.columnId === position.columnId &&
+        cell.position.rowId === position.rowId
+    );
+
+    if (foundIndex === -1) {
+      throw Error(`Invalid Position ${position}`);
+    }
+
+    if (cells[foundIndex].cellData.value === update) {
+      return;
+    }
+
+    if (cells[foundIndex].cellData.type !== "editable") {
+      return;
+    }
+
+    console.log("setCellsCallback");
+    setCells((oldCells) => {
+      console.log("setCells");
+
+      oldCells[foundIndex].cellData.value = update;
+    });
+  };
 
   return (
-    <CellsContext.Provider value={cells}>
+    <CellsContext.Provider value={{ cells, updateCellData }}>
       {props.children}
     </CellsContext.Provider>
   );

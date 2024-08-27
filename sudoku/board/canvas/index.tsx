@@ -30,12 +30,8 @@ import {
   ViewportScaler,
 } from "./ViewportScaler";
 
-export const CanvasBoard = (props: { board: BoardData }) => {
-  return (
-    <CellsProvider {...props}>
-      <CanvasManager />
-    </CellsProvider>
-  );
+export const CanvasBoard = () => {
+  return <CanvasManager />;
 };
 
 const CanvasManager = () => {
@@ -45,7 +41,7 @@ const CanvasManager = () => {
   const renderViewport = useRenderViewport();
   const virtualViewport = getVirtualViewport();
 
-  const cells = useContext(CellsContext);
+  const { cells } = useContext(CellsContext);
 
   const { setFocus } = useFocusContext();
 
@@ -62,6 +58,7 @@ const CanvasManager = () => {
     [setFocus, renderViewport, cells] // CAUTION: deps not supported by eslint
   );
 
+  console.log("update Canvas");
   return (
     <Canvas
       style={{
@@ -80,7 +77,7 @@ const CanvasManager = () => {
 };
 
 const BoardComponent = () => {
-  const cells = useContext(CellsContext);
+  const { cells } = useContext(CellsContext);
 
   return (
     <>
