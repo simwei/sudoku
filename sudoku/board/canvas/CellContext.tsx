@@ -1,5 +1,10 @@
-import React, { PropsWithChildren, createContext } from "react";
-import { ImmerReducer, useImmerReducer } from "use-immer";
+import { applyPatches, Patch, produce, produceWithPatches } from "immer";
+import React, {
+  createContext,
+  PropsWithChildren,
+  useRef,
+  useState,
+} from "react";
 import {
   BoardData,
   CellData,
@@ -28,105 +33,141 @@ export type Cell = {
 
 type Cells = Cell[];
 
-type Action =
+type CellAction =
   | {
       type: "toggleNumber";
-      position: CellPosition;
+      position?: CellPosition;
       value: Digit;
     }
   | {
       type: "toggleHint";
-      position: CellPosition;
+      position?: CellPosition;
       value: Digit;
     }
-  | { type: "resetBoard" };
+  | { type: "resetBoard"; position?: never; value?: never };
+
+type HistoryAction = { type: "undo" } | { type: "redo" };
 
 export const CellsContext = createContext<{
   cells: Cells;
-  dispatch: (action: Action) => void;
-}>({ cells: [], dispatch: () => {} });
-
-const reducer: ImmerReducer<Cells, Action> = (draft, action: Action) => {
-  switch (action.type) {
-    case "toggleNumber": {
-      const cell = getCell(draft, action.position);
-
-      if (cell.cellData.type === "editable") {
-        toggleNumber(cell.cellData, action.value);
-      }
-      break;
-    }
-
-    case "toggleHint": {
-      const cell = getCell(draft, action.position);
-      if (
-        cell.cellData.type === "editable" &&
-        cell.cellData.value === undefined
-      ) {
-        toggleHint(cell.cellData, action.value);
-      }
-      break;
-    }
-
-    case "resetBoard": {
-      resetBoard(draft);
-      break;
-    }
-
-    default: {
-      // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-      const _: never = action;
-    }
-  }
-};
-
-function getCell(draft: Cells, position: CellPosition) {
-  const targetCell = draft.find(
-    (cell) =>
-      cell.position.columnId === position.columnId &&
-      cell.position.rowId === position.rowId
-  );
-
-  if (targetCell === undefined) {
-    throw Error(
-      `No Cell found for ${JSON.stringify(position)} in ${JSON.stringify(draft)}}`
-    );
-  }
-  return targetCell;
-}
-
-const resetBoard = (draft: Cells) => {
-  draft.forEach((cell) => {
-    if (cell.cellData.type === "editable") {
-      cell.cellData.value = undefined;
-      cell.cellData.hints = undefined;
-    }
-  });
-};
-
-const toggleHint = (cellData: CellData, key: Digit) => {
-  if (cellData.hints === undefined) {
-    cellData.hints = new Map();
-  }
-  cellData.hints.set(key, !cellData.hints.get(key));
-};
-
-const toggleNumber = (cellData: CellData, newDigit: Digit) => {
-  if (cellData.value === newDigit) {
-    // remove value when the same is entered again
-    cellData.value = undefined;
-  } else {
-    cellData.value = newDigit;
-  }
-};
+  cellDispatch: (action: CellAction) => void;
+  historyDispatch: (action: HistoryAction) => void;
+}>({ cells: [], cellDispatch: () => {}, historyDispatch: () => {} });
 
 export const CellsProvider = (
   props: PropsWithChildren & { board: BoardData }
 ) => {
-  const [cells, dispatch] = useImmerReducer(reducer, buildCells(props.board));
+  const [cells, setState] = useState(buildCells(props.board));
+
+  const undoStack = useRef<{ patches: Patch[]; inversePatches: Patch[] }[]>([]);
+  const undoStackPointer = useRef(-1);
+
+  const cellAction = produceWithPatches((draft: Cells, action: CellAction) => {
+    switch (action.type) {
+      case "toggleNumber": {
+        if (!action.position) {
+          return;
+        }
+        const cell = getCell(draft, action.position);
+
+        if (cell.cellData.type === "editable") {
+          ((cellData: CellData, newDigit: Digit) => {
+            if (cellData.value === newDigit) {
+              // remove value when the same is entered again
+              cellData.value = undefined;
+            } else {
+              cellData.value = newDigit;
+            }
+          })(cell.cellData, action.value);
+        }
+        break;
+      }
+
+      case "toggleHint": {
+        if (!action.position) {
+          return;
+        }
+        const cell = getCell(draft, action.position);
+
+        if (
+          cell.cellData.type === "editable" &&
+          cell.cellData.value === undefined
+        ) {
+          ((cellData: CellData, key: Digit) => {
+            if (cellData.hints === undefined) {
+              cellData.hints = new Map();
+            }
+            cellData.hints.set(key, !cellData.hints.get(key));
+          })(cell.cellData, action.value);
+        }
+        break;
+      }
+
+      case "resetBoard": {
+        draft.forEach((cell) => {
+          if (cell.cellData.type === "editable") {
+            cell.cellData.value = undefined;
+            cell.cellData.hints = undefined;
+          }
+        });
+        break;
+      }
+    }
+  });
+
+  const historyAction = produce((draft: Cells, action: HistoryAction) => {
+    switch (action.type) {
+      case "undo": {
+        if (undoStackPointer.current < 0) {
+          return;
+        }
+        const { inversePatches } = undoStack.current[undoStackPointer.current];
+        applyPatches(draft, inversePatches);
+        undoStackPointer.current--;
+        break;
+      }
+
+      case "redo": {
+        if (undoStackPointer.current === undoStack.current.length - 1) {
+          return;
+        }
+
+        undoStackPointer.current++;
+
+        const { patches } = undoStack.current[undoStackPointer.current];
+        applyPatches(draft, patches);
+        break;
+      }
+    }
+  });
+
+  const historyDispatch = (action: HistoryAction) => {
+    setState((currentState) => {
+      return historyAction(currentState, action);
+    });
+  };
+
+  const cellDispatch = (action: CellAction) => {
+    if (!action.position) {
+      return;
+    }
+
+    setState((currentState) => {
+      const [nextState, patches, inversePatches] = cellAction(
+        currentState,
+        action
+      );
+
+      const pointer = ++undoStackPointer.current;
+      undoStack.current.length = pointer;
+      undoStack.current[pointer] = { patches, inversePatches };
+
+      return nextState;
+    });
+  };
 
   return (
-    <CellsContext.Provider value={{ cells, dispatch }}>
+    <CellsContext.Provider value={{ cells, cellDispatch, historyDispatch }}>
       {props.children}
     </CellsContext.Provider>
   );
@@ -156,6 +197,21 @@ const buildCells = (board: BoardData) => {
 
   return cells;
 };
+
+function getCell(cells: Cells, position: CellPosition) {
+  const targetCell = cells.find(
+    (cell) =>
+      cell.position.columnId === position.columnId &&
+      cell.position.rowId === position.rowId
+  );
+
+  if (targetCell === undefined) {
+    throw Error(
+      `No Cell found for ${JSON.stringify(position)} in ${JSON.stringify(cells)}}`
+    );
+  }
+  return targetCell;
+}
 
 export const getCellPosition = (
   cells: Cells,

@@ -5,68 +5,86 @@ import { colors } from "../colors";
 import { useFocusContext } from "../focus/FocusContext";
 import { Digit } from "../scheme/BoardData";
 
-export const NumberButton = (props: { num: Digit }) => {
-  const { dispatch } = useContext(CellsContext);
-  const { focus } = useFocusContext();
-
-  const textStyle: TextStyle = { fontSize: 30, fontFamily: "Varela" };
-
-  const buttonStyle: ViewStyle = {
+const basicButtonStyle = (pressed?: boolean): ViewStyle => {
+  return {
     borderRadius: 4,
-    aspectRatio: 1,
     height: 60,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: pressed ? colors.buttonPressed : colors.button,
   };
+};
+
+const basicTextStyle: TextStyle = { fontSize: 30, fontFamily: "Varela" };
+
+export const NumberButton = (props: { num: Digit }) => {
+  const { cellDispatch } = useContext(CellsContext);
+  const { focus } = useFocusContext();
 
   return (
     <Pressable
-      style={({ pressed }) => [
-        buttonStyle,
-        { backgroundColor: pressed ? colors.buttonPressed : colors.button },
-      ]}
+      style={({ pressed }) => [basicButtonStyle(pressed), { aspectRatio: 1 }]}
       onPress={(_) => {
-        if (focus) {
-          dispatch({ type: "toggleNumber", position: focus, value: props.num });
-        }
+        cellDispatch({
+          type: "toggleNumber",
+          position: focus,
+          value: props.num,
+        });
       }}
       onLongPress={(_) => {
-        if (focus) {
-          dispatch({ type: "toggleHint", position: focus, value: props.num });
-        }
+        cellDispatch({
+          type: "toggleHint",
+          position: focus,
+          value: props.num,
+        });
       }}
     >
-      <Text style={textStyle}>{props.num.toString()}</Text>
+      <Text style={basicTextStyle}>{props.num.toString()}</Text>
     </Pressable>
   );
 };
 
 export const ResetButton = () => {
-  const { dispatch } = useContext(CellsContext);
-  const { focus } = useFocusContext();
-
-  const textStyle: TextStyle = { fontSize: 30, fontFamily: "Varela" };
-
-  const buttonStyle: ViewStyle = {
-    borderRadius: 4,
-    height: 60,
-    justifyContent: "center",
-    alignItems: "center",
-  };
+  const { cellDispatch } = useContext(CellsContext);
 
   return (
     <Pressable
-      style={({ pressed }) => [
-        buttonStyle,
-        { backgroundColor: pressed ? colors.buttonPressed : colors.button },
-      ]}
+      style={({ pressed }) => [basicButtonStyle(pressed)]}
       onPress={(_) => {
-        if (focus) {
-          dispatch({ type: "resetBoard" });
-        }
+        cellDispatch({ type: "resetBoard" });
       }}
     >
-      <Text style={textStyle}>reset</Text>
+      <Text style={basicTextStyle}>reset</Text>
+    </Pressable>
+  );
+};
+
+export const UndoButton = () => {
+  const { historyDispatch } = useContext(CellsContext);
+
+  return (
+    <Pressable
+      style={({ pressed }) => [basicButtonStyle(pressed), { flex: 1 }]}
+      onPress={(_) => {
+        historyDispatch({ type: "undo" });
+      }}
+    >
+      <Text style={basicTextStyle}>undo</Text>
+    </Pressable>
+  );
+};
+
+export const RedoButton = () => {
+  const { historyDispatch } = useContext(CellsContext);
+
+  return (
+    <Pressable
+      style={({ pressed }) => [basicButtonStyle(pressed), { flex: 1 }]}
+      onPress={(_) => {
+        historyDispatch({ type: "redo" });
+      }}
+    >
+      <Text style={basicTextStyle}>redo</Text>
     </Pressable>
   );
 };
