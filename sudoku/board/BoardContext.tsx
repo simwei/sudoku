@@ -219,7 +219,7 @@ const buildCells = (board: BoardData) => {
   return cells;
 };
 
-function getCell(cells: Cells, position: CellPosition) {
+export function getCell(cells: Cells, position: CellPosition) {
   const targetCell = cells.find(
     (cell) =>
       cell.position.columnId === position.columnId &&

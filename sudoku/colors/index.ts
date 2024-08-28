@@ -1,5 +1,11 @@
+import { useContext } from "react";
+import { BoardContext } from "../board/BoardContext";
 import { useFocusContext } from "../focus/FocusContext";
-import { CellPosition, getBlockIdentifier } from "../scheme/BoardData";
+import {
+  CellData,
+  CellPosition,
+  getBlockIdentifier,
+} from "../scheme/BoardData";
 
 export const colors = {
   noFocus: "#ffffff",
@@ -12,9 +18,34 @@ export const colors = {
   innerBorderColor: "gray",
   outerBorderColor: "black",
   blockBorderColor: "black",
+  errorBackground: "pink",
 };
 
-export function useBackgroundColor(position: CellPosition) {
+export function useBackgroundColor(props: {
+  cellData: CellData;
+  position: CellPosition;
+}) {
+  const { isFocused, isSecondaryFocused } = useIsFocused(props);
+  const { isError } = useIsError(props);
+
+  if (isError) {
+    return colors.errorBackground;
+  }
+
+  if (isFocused) {
+    return colors.focus;
+  }
+
+  if (isSecondaryFocused) {
+    return colors.secondaryFocus;
+  }
+
+  // else
+  return colors.noFocus;
+}
+
+function useIsFocused(props: { position: CellPosition }) {
+  const { position } = props;
   const { focus } = useFocusContext();
 
   const isFocused =
@@ -27,12 +58,35 @@ export function useBackgroundColor(position: CellPosition) {
     (focus.columnId === position.columnId ||
       focus.rowId === position.rowId ||
       getBlockIdentifier(focus) === getBlockIdentifier(position));
+  return { isFocused, isSecondaryFocused };
+}
 
-  const backgroundColor = isFocused
-    ? colors.focus
-    : isSecondaryFocused
-      ? colors.secondaryFocus
-      : colors.noFocus;
+function useIsError(props: { cellData: CellData; position: CellPosition }) {
+  const { position, cellData } = props;
+  const { cells } = useContext(BoardContext);
 
-  return backgroundColor;
+  if (cellData.value === undefined) {
+    return { isError: false };
+  }
+
+  const isError = cells.some((other) => {
+    const sameValue = other.cellData.value === cellData.value;
+
+    const sameBlock =
+      getBlockIdentifier(other.position) === getBlockIdentifier(position);
+    const sameColumn = other.position.columnId === position.columnId;
+    const sameRow = other.position.rowId === position.rowId;
+
+    const notSamePosition = !(
+      other.position.columnId === position.columnId &&
+      other.position.rowId === position.rowId
+    );
+
+    const hasError =
+      sameValue && (sameBlock || sameColumn || sameRow) && notSamePosition;
+
+    return hasError;
+  });
+
+  return { isError };
 }

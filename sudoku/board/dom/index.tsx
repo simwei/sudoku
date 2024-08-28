@@ -66,7 +66,7 @@ const DOMCell = (props: {
   dimensions: { height: number; width: number };
 }) => {
   const { setFocus } = useFocusContext();
-  const backgroundColor = useBackgroundColor(props.position);
+  const backgroundColor = useBackgroundColor(props);
 
   const { outerBorderStyle, innerBorderStyle } = borderStyle(
     props.position,

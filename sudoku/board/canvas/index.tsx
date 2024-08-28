@@ -91,7 +91,7 @@ const BoardComponent = () => {
 };
 
 const CellComponent = (props: Cell) => {
-  const backgroundColor = useBackgroundColor(props.position);
+  const backgroundColor = useBackgroundColor(props);
 
   return (
     <>
