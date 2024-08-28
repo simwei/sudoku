@@ -1,44 +1,41 @@
-import { useFonts } from "expo-font";
-import { SplashScreen } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import { enableMapSet, enablePatches } from "immer";
-import React, { useEffect } from "react";
-import { StyleSheet, View } from "react-native";
-import { Sudoku } from "../sudoku";
-
-enableMapSet();
-enablePatches();
-
-SplashScreen.preventAutoHideAsync();
+import { Link, SplashScreen } from "expo-router";
+import React from "react";
+import { FlatList, StyleSheet, Text } from "react-native";
+import {
+  GestureHandlerRootView,
+  RectButton,
+} from "react-native-gesture-handler";
 
 export default function App() {
-  const [loaded, error] = useFonts({
-    Varela: require("../assets/fonts/Varela-Regular.ttf"),
-  });
-
-  useEffect(() => {
-    if (loaded || error) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded, error]);
-
-  if (!loaded && !error) {
-    return null;
-  }
+  SplashScreen.hideAsync();
 
   return (
-    <View style={styles.container}>
-      <Sudoku />
-      <StatusBar style="auto" />
-    </View>
+    <GestureHandlerRootView>
+      <FlatList
+        data={[{ href: "./game/sudoku", text: "Play Sudoku" }]}
+        renderItem={({ item }) => (
+          <Link href={item.href} asChild style={[styles.button]}>
+            <RectButton>
+              <Text>{item.text}</Text>
+            </RectButton>
+          </Link>
+        )}
+        contentContainerStyle={styles.container}
+      />
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
+  button: {
+    borderRadius: 4,
+    height: 60,
     justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "lightgray",
+  },
+  container: {
+    rowGap: 10,
+    margin: 10,
   },
 });
