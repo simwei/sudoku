@@ -179,6 +179,10 @@ export const BoardProvider = (
   ) => {
     const [nextState, patches, inversePatches] = actionFn(currentState, action);
 
+    if (patches.length === 0 && inversePatches.length === 0) {
+      return nextState;
+    }
+
     const pointer = ++undoStackPointer.current;
     undoStack.current.length = pointer;
     undoStack.current[pointer] = { patches, inversePatches };
