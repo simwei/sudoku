@@ -1,28 +1,35 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Text, View, ViewStyle } from "react-native";
 import { colors, useBackgroundColor } from "../../colors";
 import { useFocusContext } from "../../focus/FocusContext";
 import {
-  BoardData,
   CellData,
   CellPosition,
   RowData,
   RowPosition,
 } from "../../scheme/BoardData";
+import { CellsContext } from "../canvas/CellContext";
 import { useTargetBoardWidth } from "../useTargetBoardWidth";
 
-export const DOMBoard = (props: { board: BoardData }) => {
+export const DOMBoard = () => {
+  const { cells } = useContext(CellsContext);
   const targetBoardDimension = useTargetBoardWidth();
+
+  const rows = [1, 2, 3, 4, 5, 6, 7, 8, 9].map((_, index) => ({
+    cells: cells
+      .filter((cell) => cell.position.rowId === index)
+      .map((cell) => cell.cellData),
+  }));
 
   return (
     <View style={{ width: targetBoardDimension, height: targetBoardDimension }}>
-      {props.board.rows.map((row, rowId) => (
+      {rows.map((row, rowId) => (
         <DOMRow
           position={{ rowId }}
           rowData={row}
           key={rowId}
           dimensions={{
-            height: targetBoardDimension / props.board.rows.length,
+            height: targetBoardDimension / rows.length,
           }}
         />
       ))}
@@ -90,8 +97,8 @@ const DOMCell = (props: {
         <Text
           style={[
             props.cellData.type === "editable"
-              ? { color: colors.givenText }
-              : { color: colors.editableText },
+              ? { color: colors.editableText }
+              : { color: colors.givenText },
             textStyle,
           ]}
         >

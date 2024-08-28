@@ -77,24 +77,20 @@ export function isDigit(value: any): value is Digit {
   return [1, 2, 3, 4, 5, 6, 7, 8, 9].includes(value);
 }
 
-export interface CellData {
+export type CellHints = Map<Digit, boolean>;
+
+export type CellType = "given" | "editable";
+
+export type CellData = {
   value?: Digit;
-  type: "given" | "editable";
-}
+  hints?: CellHints;
+  type: CellType;
+};
 
-export interface CellPosition {
-  rowId: number;
-  columnId: number;
-}
+export type CellPosition = { rowId: number; columnId: number };
 
-export interface RowPosition {
-  rowId: number;
-}
+export type RowPosition = { rowId: number };
 
-export interface RowData {
-  cells: Array<CellData>;
-}
+export type RowData = { cells: Array<CellData> };
 
-export interface BoardData {
-  rows: Array<RowData>;
-}
+export type BoardData = { rows: Array<RowData> };

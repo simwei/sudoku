@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, createContext } from "react";
-import { useImmer } from "use-immer";
+import { ImmerReducer, useImmerReducer } from "use-immer";
 import {
   BoardData,
   CellData,
@@ -28,46 +28,105 @@ export type Cell = {
 
 type Cells = Cell[];
 
-type UpdateCellDataFn = (position: CellPosition, update: UpdateValue) => void;
-
-type UpdateValue = Digit | undefined;
+type Action =
+  | {
+      type: "toggleNumber";
+      position: CellPosition;
+      value: Digit;
+    }
+  | {
+      type: "toggleHint";
+      position: CellPosition;
+      value: Digit;
+    }
+  | { type: "resetBoard" };
 
 export const CellsContext = createContext<{
   cells: Cells;
-  updateCellData: UpdateCellDataFn;
-}>({ cells: [], updateCellData: () => {} });
+  dispatch: (action: Action) => void;
+}>({ cells: [], dispatch: () => {} });
+
+const reducer: ImmerReducer<Cells, Action> = (draft, action: Action) => {
+  switch (action.type) {
+    case "toggleNumber": {
+      const cell = getCell(draft, action.position);
+
+      if (cell.cellData.type === "editable") {
+        toggleNumber(cell.cellData, action.value);
+      }
+      break;
+    }
+
+    case "toggleHint": {
+      const cell = getCell(draft, action.position);
+      if (
+        cell.cellData.type === "editable" &&
+        cell.cellData.value === undefined
+      ) {
+        toggleHint(cell.cellData, action.value);
+      }
+      break;
+    }
+
+    case "resetBoard": {
+      resetBoard(draft);
+      break;
+    }
+
+    default: {
+      // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+      const _: never = action;
+    }
+  }
+};
+
+function getCell(draft: Cells, position: CellPosition) {
+  const targetCell = draft.find(
+    (cell) =>
+      cell.position.columnId === position.columnId &&
+      cell.position.rowId === position.rowId
+  );
+
+  if (targetCell === undefined) {
+    throw Error(
+      `No Cell found for ${JSON.stringify(position)} in ${JSON.stringify(draft)}}`
+    );
+  }
+  return targetCell;
+}
+
+const resetBoard = (draft: Cells) => {
+  draft.forEach((cell) => {
+    if (cell.cellData.type === "editable") {
+      cell.cellData.value = undefined;
+      cell.cellData.hints = undefined;
+    }
+  });
+};
+
+const toggleHint = (cellData: CellData, key: Digit) => {
+  if (cellData.hints === undefined) {
+    cellData.hints = new Map();
+  }
+  cellData.hints.set(key, !cellData.hints.get(key));
+};
+
+const toggleNumber = (cellData: CellData, newDigit: Digit) => {
+  if (cellData.value === newDigit) {
+    // remove value when the same is entered again
+    cellData.value = undefined;
+  } else {
+    cellData.value = newDigit;
+  }
+};
 
 export const CellsProvider = (
   props: PropsWithChildren & { board: BoardData }
 ) => {
-  const [cells, setCells] = useImmer(buildCells(props.board));
-
-  const updateCellData = (position: CellPosition, update: UpdateValue) => {
-    const foundIndex = cells.findIndex(
-      (cell) =>
-        cell.position.columnId === position.columnId &&
-        cell.position.rowId === position.rowId
-    );
-
-    if (foundIndex === -1) {
-      throw Error(`Invalid Position ${position}`);
-    }
-
-    if (cells[foundIndex].cellData.value === update) {
-      return;
-    }
-
-    if (cells[foundIndex].cellData.type !== "editable") {
-      return;
-    }
-
-    setCells((oldCells) => {
-      oldCells[foundIndex].cellData.value = update;
-    });
-  };
+  const [cells, dispatch] = useImmerReducer(reducer, buildCells(props.board));
 
   return (
-    <CellsContext.Provider value={{ cells, updateCellData }}>
+    <CellsContext.Provider value={{ cells, dispatch }}>
       {props.children}
     </CellsContext.Provider>
   );
@@ -88,7 +147,7 @@ const buildCells = (board: BoardData) => {
     for (let [columnId, cellData] of row.cells.entries()) {
       const position = { rowId, columnId };
       cells.push({
-        cellData,
+        cellData: { ...cellData },
         position: { rowId, columnId },
         geometry: calculateCellGeometry(position),
       });

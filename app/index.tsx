@@ -1,9 +1,12 @@
 import { useFonts } from "expo-font";
 import { SplashScreen } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { enableMapSet } from "immer";
 import React, { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import { Sudoku } from "../sudoku";
+
+enableMapSet();
 
 SplashScreen.preventAutoHideAsync();
 

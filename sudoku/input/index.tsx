@@ -1,7 +1,7 @@
 import React from "react";
 import { View, ViewStyle } from "react-native";
 import { Digit } from "../scheme/BoardData";
-import { NumberButton } from "./Button";
+import { NumberButton, ResetButton } from "./Button";
 
 export const InputRow = () => {
   const rowStyle: ViewStyle = {
@@ -29,6 +29,8 @@ export const InputRow = () => {
           ))}
         </View>
       ))}
+
+      <ResetButton />
     </View>
   );
 };
