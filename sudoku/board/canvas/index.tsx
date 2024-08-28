@@ -14,8 +14,8 @@ import { colors, useBackgroundColor } from "../../colors";
 import { useFocusContext } from "../../focus/FocusContext";
 import { useFontManager } from "../../font/FontContext";
 import { CellType, Digit } from "../../scheme/BoardData";
+import { BoardContext, Cell, getCellPosition } from "../BoardContext";
 import { useTargetBoardWidth } from "../useTargetBoardWidth";
-import { Cell, CellsContext, getCellPosition } from "./CellContext";
 import { BlockGridPath } from "./grid/BlockGridPath";
 import { InnerGridPath } from "./grid/InnerGridPath";
 import { OuterGridPath } from "./grid/OuterGridPath";
@@ -37,7 +37,7 @@ const CanvasManager = () => {
   const renderViewport = useRenderViewport();
   const virtualViewport = getVirtualViewport();
 
-  const { cells } = useContext(CellsContext);
+  const { cells } = useContext(BoardContext);
 
   const { setFocus } = useFocusContext();
 
@@ -72,7 +72,7 @@ const CanvasManager = () => {
 };
 
 const BoardComponent = () => {
-  const { cells } = useContext(CellsContext);
+  const { cells } = useContext(BoardContext);
 
   return (
     <>

@@ -5,18 +5,13 @@ import React, {
   useRef,
   useState,
 } from "react";
-import {
-  BoardData,
-  CellData,
-  CellPosition,
-  Digit,
-} from "../../scheme/BoardData";
+import { BoardData, CellData, CellPosition, Digit } from "../scheme/BoardData";
 import {
   cellHeight,
   cellWidth,
   globalXMargin,
   globalYMargin,
-} from "./geometry/consts";
+} from "./canvas/geometry/consts";
 
 type CellGeometry = {
   x: number;
@@ -43,21 +38,28 @@ type CellAction =
       type: "toggleHint";
       position?: CellPosition;
       value: Digit;
-    }
-  | { type: "resetBoard"; position?: never; value?: never };
+    };
+
+type BoardAction = { type: "resetBoard" };
 
 type HistoryAction = { type: "undo" } | { type: "redo" };
 
-export const CellsContext = createContext<{
+export const BoardContext = createContext<{
   cells: Cells;
   cellDispatch: (action: CellAction) => void;
   historyDispatch: (action: HistoryAction) => void;
-}>({ cells: [], cellDispatch: () => {}, historyDispatch: () => {} });
+  boardDispatch: (action: BoardAction) => void;
+}>({
+  cells: [],
+  cellDispatch: () => {},
+  historyDispatch: () => {},
+  boardDispatch: () => {},
+});
 
-export const CellsProvider = (
-  props: PropsWithChildren & { board: BoardData }
+export const BoardProvider = (
+  props: PropsWithChildren & { boardData: BoardData }
 ) => {
-  const [cells, setState] = useState(buildCells(props.board));
+  const [cells, setState] = useState(buildCells(props.boardData));
 
   const undoStack = useRef<{ patches: Patch[]; inversePatches: Patch[] }[]>([]);
   const undoStackPointer = useRef(-1);
@@ -102,18 +104,18 @@ export const CellsProvider = (
         }
         break;
       }
-
-      case "resetBoard": {
-        draft.forEach((cell) => {
-          if (cell.cellData.type === "editable") {
-            cell.cellData.value = undefined;
-            cell.cellData.hints = undefined;
-          }
-        });
-        break;
-      }
     }
   });
+
+  const cellDispatch = (action: CellAction) => {
+    if (!action.position) {
+      return;
+    }
+
+    setState((currentState) => {
+      return recordHistory(cellAction, currentState, action);
+    });
+  };
 
   const historyAction = produce((draft: Cells, action: HistoryAction) => {
     switch (action.type) {
@@ -143,33 +145,52 @@ export const CellsProvider = (
 
   const historyDispatch = (action: HistoryAction) => {
     setState((currentState) => {
+      // don´t record history here, because it is forcefully manipulated
       return historyAction(currentState, action);
     });
   };
 
-  const cellDispatch = (action: CellAction) => {
-    if (!action.position) {
-      return;
+  const boardAction = produceWithPatches(
+    (draft: Cells, action: BoardAction) => {
+      switch (action.type) {
+        case "resetBoard": {
+          draft.forEach((cell) => {
+            if (cell.cellData.type === "editable") {
+              cell.cellData.value = undefined;
+              cell.cellData.hints = undefined;
+            }
+          });
+          break;
+        }
+      }
     }
+  );
 
+  const boardDispatch = (action: BoardAction) => {
     setState((currentState) => {
-      const [nextState, patches, inversePatches] = cellAction(
-        currentState,
-        action
-      );
-
-      const pointer = ++undoStackPointer.current;
-      undoStack.current.length = pointer;
-      undoStack.current[pointer] = { patches, inversePatches };
-
-      return nextState;
+      return recordHistory(boardAction, currentState, action);
     });
   };
 
+  const recordHistory = <S extends Cells, A extends CellAction | BoardAction>(
+    actionFn: { (base: S, action: A): readonly [S, Patch[], Patch[]] },
+    currentState: S,
+    action: A
+  ) => {
+    const [nextState, patches, inversePatches] = actionFn(currentState, action);
+
+    const pointer = ++undoStackPointer.current;
+    undoStack.current.length = pointer;
+    undoStack.current[pointer] = { patches, inversePatches };
+    return nextState;
+  };
+
   return (
-    <CellsContext.Provider value={{ cells, cellDispatch, historyDispatch }}>
+    <BoardContext.Provider
+      value={{ cells, cellDispatch, historyDispatch, boardDispatch }}
+    >
       {props.children}
-    </CellsContext.Provider>
+    </BoardContext.Provider>
   );
 };
 
