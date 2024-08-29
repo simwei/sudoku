@@ -1,5 +1,4 @@
-import { useContext } from "react";
-import { BoardContext } from "../board/BoardContext";
+import { useBoardContext } from "../board/BoardContext";
 import { useFocusContext } from "../focus/FocusContext";
 import {
   CellData,
@@ -63,7 +62,7 @@ function useIsFocused(props: { position: CellPosition }) {
 
 function useIsError(props: { cellData: CellData; position: CellPosition }) {
   const { position, cellData } = props;
-  const { cells } = useContext(BoardContext);
+  const { cells } = useBoardContext();
 
   if (cellData.value === undefined) {
     return { isError: false };

@@ -1,6 +1,6 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Pressable, Text, TextStyle, ViewStyle } from "react-native";
-import { BoardContext } from "../board/BoardContext";
+import { useBoardContext } from "../board/BoardContext";
 import { colors } from "../colors";
 import { useFocusContext } from "../focus/FocusContext";
 import { Digit } from "../scheme/BoardData";
@@ -18,7 +18,7 @@ const basicButtonStyle = (pressed?: boolean): ViewStyle => {
 const basicTextStyle: TextStyle = { fontSize: 30, fontFamily: "Varela" };
 
 export const NumberButton = (props: { num: Digit }) => {
-  const { cellDispatch } = useContext(BoardContext);
+  const { cellDispatch } = useBoardContext();
   const { focus } = useFocusContext();
 
   return (
@@ -45,7 +45,7 @@ export const NumberButton = (props: { num: Digit }) => {
 };
 
 export const ResetButton = () => {
-  const { boardDispatch } = useContext(BoardContext);
+  const { boardDispatch } = useBoardContext();
 
   return (
     <Pressable
@@ -60,7 +60,7 @@ export const ResetButton = () => {
 };
 
 export const UndoButton = () => {
-  const { historyDispatch } = useContext(BoardContext);
+  const { historyDispatch } = useBoardContext();
 
   return (
     <Pressable
@@ -75,7 +75,7 @@ export const UndoButton = () => {
 };
 
 export const RedoButton = () => {
-  const { historyDispatch } = useContext(BoardContext);
+  const { historyDispatch } = useBoardContext();
 
   return (
     <Pressable

@@ -1,8 +1,8 @@
 import { FiberProvider } from "its-fine";
 import React from "react";
 import { BoardProvider } from "./board/BoardContext";
-import { CanvasBoard } from "./board/canvas";
-import { DOMBoard } from "./board/dom";
+import { CanvasBoard } from "./board/canvas/CanvasBoard";
+import { DOMBoard } from "./board/dom/DOMBoard";
 import { createSampleBoard } from "./dummy/createSampleBoard";
 import { FocusProvider } from "./focus/FocusContext";
 import { FontManagerProvider } from "./font/FontContext";

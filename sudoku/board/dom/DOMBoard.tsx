@@ -1,5 +1,5 @@
-import React, { useContext } from "react";
-import { Text, View, ViewStyle } from "react-native";
+import React from "react";
+import { Text, useWindowDimensions, View, ViewStyle } from "react-native";
 import { colors, useBackgroundColor } from "../../colors";
 import { useFocusContext } from "../../focus/FocusContext";
 import {
@@ -8,11 +8,16 @@ import {
   RowData,
   RowPosition,
 } from "../../scheme/BoardData";
-import { BoardContext } from "../BoardContext";
-import { useTargetBoardWidth } from "../useTargetBoardWidth";
+import { useBoardContext } from "../BoardContext";
+
+const useTargetBoardWidth = () => {
+  const dimensions = useWindowDimensions();
+  const minWindowDimension = Math.min(dimensions.height, dimensions.width);
+  return minWindowDimension * 0.9;
+};
 
 export const DOMBoard = () => {
-  const { cells } = useContext(BoardContext);
+  const { cells } = useBoardContext();
   const targetBoardDimension = useTargetBoardWidth();
 
   const rows = [1, 2, 3, 4, 5, 6, 7, 8, 9].map((_, index) => ({
