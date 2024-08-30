@@ -11,7 +11,6 @@ export const InputRow = () => {
 
   const inputStyle: ViewStyle = {
     rowGap: 10,
-    margin: 20,
   };
 
   return (
@@ -30,12 +29,12 @@ export const InputRow = () => {
         </View>
       ))}
 
-      <ResetButton />
+      {/* <ResetButton />
 
       <View style={rowStyle}>
         <UndoButton />
         <RedoButton />
-      </View>
+      </View> */}
     </View>
   );
 };
