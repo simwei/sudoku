@@ -1,5 +1,9 @@
 import { CellPosition, CellRecord } from "../../../../scheme/BoardData";
-import { BoardSize, useBoardSize } from "../../../BoardContext";
+import {
+  BoardSize,
+  useBoardAspectRatio,
+  useBoardSize,
+} from "../../../BoardContext";
 import {
   ContainerDimensions,
   useContainerDimensionContext,
@@ -20,9 +24,7 @@ type Rect = {
 export const useEffectiveBoardRect = (): Rect => {
   // adds margins and centering
   const { containerDimensions } = useContainerDimensionContext();
-  const boardSize = useBoardSize();
-
-  const aspectRatio = boardSize.rows / boardSize.columns;
+  const aspectRatio = useBoardAspectRatio();
 
   const baseDimensions = withGlobalMargin(containerDimensions);
 
@@ -42,19 +44,19 @@ export function center(innerRect: Rect, outerRect: Rect) {
 }
 
 function shrinkToAspectRatio(rect: Rect, targetAspectRatio: number) {
-  const currentAspectRatio = rect.height / rect.width;
+  const currentAspectRatio = rect.width / rect.height;
 
-  const shouldShrinkVertically = currentAspectRatio > targetAspectRatio;
+  const shouldShrinkVertically = targetAspectRatio > currentAspectRatio;
 
   if (shouldShrinkVertically) {
     return {
       ...rect,
-      height: rect.width * targetAspectRatio,
+      height: rect.width / targetAspectRatio,
     };
   }
   return {
     ...rect,
-    width: rect.height / targetAspectRatio,
+    width: rect.height * targetAspectRatio,
   };
 }
 

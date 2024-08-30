@@ -231,6 +231,12 @@ export const useBoardSize = (): BoardSize => {
   };
 };
 
+export const useBoardAspectRatio = (): number => {
+  // aspect ratio = width / height (as in CSS)
+  const boardSize = useBoardSize();
+  return boardSize.columns / boardSize.rows;
+};
+
 export type BoardSize = {
   rows: number;
   columns: number;

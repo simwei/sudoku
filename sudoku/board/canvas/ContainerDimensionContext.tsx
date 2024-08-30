@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import React, { createContext, useContext } from "react";
 
 export type ContainerDimensions = {
   height: number;
@@ -8,7 +8,7 @@ export type ContainerDimensions = {
 
 export const ContainerDimensionContext = createContext<{
   containerDimensions: ContainerDimensions;
-  setBoardDimensions: (containerDimensions: ContainerDimensions) => void;
+  setBoardDimensions: (_: React.SetStateAction<ContainerDimensions>) => void;
 } | null>(null);
 
 export const useContainerDimensionContext = () => {

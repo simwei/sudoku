@@ -1,9 +1,9 @@
 import { Canvas, useTouchHandler } from "@shopify/react-native-skia";
 import { useContextBridge } from "its-fine";
 import React, { useState } from "react";
-import { LayoutChangeEvent, ViewStyle } from "react-native";
+import { LayoutChangeEvent, View, ViewStyle } from "react-native";
 import { useFocusContext } from "../../focus/FocusContext";
-import { useBoardContext } from "../BoardContext";
+import { useBoardAspectRatio, useBoardContext } from "../BoardContext";
 import {
   ContainerDimensionContext,
   ContainerDimensions,
@@ -21,7 +21,7 @@ export const CanvasBoard = () => {
     useState<ContainerDimensions>({
       width: 0,
       height: 0,
-      strokeWidth: 0,
+      strokeWidth: 1,
     });
 
   return (
@@ -52,29 +52,52 @@ const CanvasTouchManager = () => {
     [setFocus, cells, cellDimensions, boardRect] // CAUTION: deps not supported by eslint
   );
 
-  const { setBoardDimensions } = useContainerDimensionContext();
+  const { containerDimensions, setBoardDimensions } =
+    useContainerDimensionContext();
+  const boardAspectRatio = useBoardAspectRatio();
 
   const onLayout = (e: LayoutChangeEvent) => {
-    const minDimension = Math.min(
-      e.nativeEvent.layout.height,
-      e.nativeEvent.layout.width
-    );
-    setBoardDimensions({
-      height: e.nativeEvent.layout.height,
-      width: e.nativeEvent.layout.width,
-      strokeWidth: minDimension / 200,
-    });
+    const layoutAspectRatio =
+      e.nativeEvent.layout.width / e.nativeEvent.layout.height;
+
+    const shrinkVertically = boardAspectRatio > layoutAspectRatio;
+
+    if (shrinkVertically) {
+      const width = e.nativeEvent.layout.width;
+      setBoardDimensions((old) => ({
+        ...old,
+        width: width,
+        height: width / boardAspectRatio,
+      }));
+    } else {
+      const height = e.nativeEvent.layout.height;
+      setBoardDimensions((old) => ({
+        ...old,
+        width: height * boardAspectRatio,
+        height: height,
+      }));
+    }
   };
 
   const canvasStyle: ViewStyle = {
+    height: containerDimensions.height,
+    width: containerDimensions.width,
+  };
+
+  const containerStyle: ViewStyle = {
     flex: 1,
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
   };
 
   return (
-    <Canvas style={canvasStyle} onTouch={onTouch} onLayout={onLayout}>
-      <ContextBridge>
-        <BoardComponent />
-      </ContextBridge>
-    </Canvas>
+    <View style={containerStyle} onLayout={onLayout}>
+      <Canvas style={canvasStyle} onTouch={onTouch}>
+        <ContextBridge>
+          <BoardComponent />
+        </ContextBridge>
+      </Canvas>
+    </View>
   );
 };
