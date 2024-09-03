@@ -35,7 +35,9 @@ type CheckAction = { type: "check" };
 
 type HistoryAction = { type: "undo" } | { type: "redo" };
 
-type SolverAction = { type: "solve" };
+type SolverAction =
+  | { type: "solve" }
+  | { type: "solved-board"; cells: CellRecords };
 
 const BoardContext = createContext<{
   cells: CellRecords;
@@ -204,17 +206,12 @@ export const BoardProvider = (
     (draft: CellRecords, action: SolverAction) => {
       switch (action.type) {
         case "solve": {
-          const solveResult = solveBruteForce(draft);
-          if (solveResult === false) {
-            Alert.alert(
-              "Houston, we have a problem",
-              "This board is not solvable"
-            );
-          } else {
-            draft.forEach((cell) => {
-              cell.cellData = getCell(solveResult, cell.position).cellData;
-            });
-          }
+          break;
+        }
+        case "solved-board": {
+          draft.forEach((cell) => {
+            cell.cellData = getCell(action.cells, cell.position).cellData;
+          });
         }
       }
     }

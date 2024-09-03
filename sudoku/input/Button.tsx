@@ -1,9 +1,11 @@
-import React from "react";
+import structuredClone from "@ungap/structured-clone";
+import React, { useState } from "react";
 import { Alert, Pressable, Text, TextStyle, ViewStyle } from "react-native";
 import { useBoardContext } from "../board/BoardContext";
 import { colors } from "../colors";
 import { useFocusContext } from "../focus/FocusContext";
 import { Digit } from "../scheme/BoardData";
+import { solveBruteForce } from "../solver/bruteForce";
 
 const basicButtonStyle = (pressed?: boolean): ViewStyle => {
   return {
@@ -126,22 +128,37 @@ export const CheckButton = () => {
 };
 
 export const SolveButton = () => {
-  const { solverDispatch } = useBoardContext();
+  const { cells, solverDispatch } = useBoardContext();
+  const [isSolving, setIsSolving] = useState(false);
 
   return (
     <Pressable
       style={({ pressed }) => [basicButtonStyle(pressed), { flex: 1 }]}
-      onPress={(_) =>
+      onPress={(_) => {
+        setIsSolving(true);
         Alert.alert("Warning", "This operation might take a long time", [
           {
             text: "Continue",
-            onPress: () => solverDispatch({ type: "solve" }),
+            onPress: async () => {
+              const inputCells = structuredClone(cells);
+              const solved = await solveBruteForce(inputCells);
+              console.log(solved);
+              if (solved !== false) {
+                solverDispatch({ type: "solved-board", cells: solved });
+              } else {
+                Alert.alert(
+                  "Houston, we have a problem",
+                  "This board is not solvable"
+                );
+              }
+              setIsSolving(false);
+            },
           },
-          { text: "Abort" },
-        ])
-      }
+          { text: "Abort", onPress: () => setIsSolving(false) },
+        ]);
+      }}
     >
-      <Text style={basicTextStyle}>solve</Text>
+      <Text style={basicTextStyle}>{isSolving ? "..." : "solve"}</Text>
     </Pressable>
   );
 };

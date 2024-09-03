@@ -37,19 +37,22 @@ const insertValue = (
   return solved;
 };
 
-export const solveBruteForce = (cells: CellRecords) => {
-  if (checkAnyError(cells)) {
-    return false;
-  } // sanity check
+export const solveBruteForce = async (cells: CellRecords) => {
+  return new Promise<CellRecords | false>((resolve) => {
+    if (checkAnyError(cells)) {
+      resolve(false);
+      return;
+    } // sanity check
 
-  const emptyPositions = cells
-    .filter(({ cellData }) => cellData.value === undefined)
-    .map(({ position }) => position)
-    .toReversed();
+    const emptyPositions = cells
+      .filter(({ cellData }) => cellData.value === undefined)
+      .map(({ position }) => position)
+      .toReversed();
 
-  const solved = solve(cells, emptyPositions);
+    const solved = solve(cells, emptyPositions);
 
-  return solved;
+    resolve(solved);
+  });
 };
 
 const solve = (cells: CellRecords, emptyPositions: CellPosition[]) => {
