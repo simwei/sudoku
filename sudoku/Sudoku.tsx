@@ -7,7 +7,7 @@ import { DOMBoard } from "./board/dom/DOMBoard";
 import { createSampleBoard } from "./dummy/createSampleBoard";
 import { FocusProvider } from "./focus/FocusContext";
 import { FontManagerProvider } from "./font/FontContext";
-import { InputRow } from "./input";
+import { Input } from "./input";
 
 const useCanvas = true;
 
@@ -34,7 +34,7 @@ export const Sudoku = () => {
               {useCanvas ? <CanvasBoard /> : <DOMBoard />}
             </View>
             <View style={inputContainer}>
-              <InputRow />
+              <Input />
             </View>
           </BoardProvider>
         </FocusProvider>

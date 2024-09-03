@@ -5,6 +5,7 @@ import {
   CellPosition,
   getBlockIdentifier,
 } from "../scheme/BoardData";
+import { checkError } from "../solver/checkError";
 
 export const colors = {
   noFocus: "#ffffff",
@@ -60,32 +61,14 @@ function useIsFocused(props: { position: CellPosition }) {
   return { isFocused, isSecondaryFocused };
 }
 
-function useIsError(props: { cellData: CellData; position: CellPosition }) {
+export function useIsError(props: {
+  cellData: CellData;
+  position: CellPosition;
+}) {
   const { position, cellData } = props;
   const { cells } = useBoardContext();
 
-  if (cellData.value === undefined) {
-    return { isError: false };
-  }
-
-  const isError = cells.some((other) => {
-    const sameValue = other.cellData.value === cellData.value;
-
-    const sameBlock =
-      getBlockIdentifier(other.position) === getBlockIdentifier(position);
-    const sameColumn = other.position.columnId === position.columnId;
-    const sameRow = other.position.rowId === position.rowId;
-
-    const notSamePosition = !(
-      other.position.columnId === position.columnId &&
-      other.position.rowId === position.rowId
-    );
-
-    const hasError =
-      sameValue && (sameBlock || sameColumn || sameRow) && notSamePosition;
-
-    return hasError;
-  });
+  const isError = checkError(cells, cellData, position);
 
   return { isError };
 }

@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable, Text, TextStyle, ViewStyle } from "react-native";
+import { Alert, Pressable, Text, TextStyle, ViewStyle } from "react-native";
 import { useBoardContext } from "../board/BoardContext";
 import { colors } from "../colors";
 import { useFocusContext } from "../focus/FocusContext";
@@ -16,6 +16,7 @@ const basicButtonStyle = (pressed?: boolean): ViewStyle => {
 };
 
 const basicTextStyle: TextStyle = { fontSize: 30, fontFamily: "Varela" };
+const hintTextStyle: TextStyle = { fontSize: 10, fontFamily: "Varela" };
 
 export const NumberButton = (props: { num: Digit }) => {
   const { cellDispatch } = useBoardContext();
@@ -44,12 +45,32 @@ export const NumberButton = (props: { num: Digit }) => {
   );
 };
 
+export const HintButton = (props: { num: Digit }) => {
+  const { cellDispatch } = useBoardContext();
+  const { focus } = useFocusContext();
+
+  return (
+    <Pressable
+      style={({ pressed }) => [basicButtonStyle(pressed), { aspectRatio: 1 }]}
+      onPress={(_) => {
+        cellDispatch({
+          type: "toggleHint",
+          position: focus,
+          value: props.num,
+        });
+      }}
+    >
+      <Text style={hintTextStyle}>{props.num.toString()}</Text>
+    </Pressable>
+  );
+};
+
 export const ResetButton = () => {
   const { boardDispatch } = useBoardContext();
 
   return (
     <Pressable
-      style={({ pressed }) => [basicButtonStyle(pressed)]}
+      style={({ pressed }) => [basicButtonStyle(pressed), { flex: 1 }]}
       onPress={(_) => {
         boardDispatch({ type: "resetBoard" });
       }}
@@ -85,6 +106,42 @@ export const RedoButton = () => {
       }}
     >
       <Text style={basicTextStyle}>redo</Text>
+    </Pressable>
+  );
+};
+
+export const CheckButton = () => {
+  const { checkDispatch } = useBoardContext();
+
+  return (
+    <Pressable
+      style={({ pressed }) => [basicButtonStyle(pressed), { flex: 1 }]}
+      onPress={(_) => {
+        checkDispatch({ type: "check" });
+      }}
+    >
+      <Text style={basicTextStyle}>check</Text>
+    </Pressable>
+  );
+};
+
+export const SolveButton = () => {
+  const { solverDispatch } = useBoardContext();
+
+  return (
+    <Pressable
+      style={({ pressed }) => [basicButtonStyle(pressed), { flex: 1 }]}
+      onPress={(_) =>
+        Alert.alert("Warning", "This operation might take a long time", [
+          {
+            text: "Continue",
+            onPress: () => solverDispatch({ type: "solve" }),
+          },
+          { text: "Abort" },
+        ])
+      }
+    >
+      <Text style={basicTextStyle}>solve</Text>
     </Pressable>
   );
 };

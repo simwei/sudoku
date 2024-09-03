@@ -6,15 +6,16 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { Alert } from "react-native";
 import {
   BoardData,
   CellData,
   CellPosition,
-  CellRecord,
+  CellRecords,
   Digit,
 } from "../scheme/BoardData";
-
-type CellRecords = CellRecord[];
+import { solveBruteForce } from "../solver/bruteForce";
+import { checkAnyError } from "../solver/checkError";
 
 type CellAction =
   | {
@@ -30,13 +31,19 @@ type CellAction =
 
 type BoardAction = { type: "resetBoard" };
 
+type CheckAction = { type: "check" };
+
 type HistoryAction = { type: "undo" } | { type: "redo" };
+
+type SolverAction = { type: "solve" };
 
 const BoardContext = createContext<{
   cells: CellRecords;
   cellDispatch: (action: CellAction) => void;
   historyDispatch: (action: HistoryAction) => void;
   boardDispatch: (action: BoardAction) => void;
+  checkDispatch: (action: CheckAction) => void;
+  solverDispatch: (action: SolverAction) => void;
 } | null>(null);
 
 export const useBoardContext = () => {
@@ -165,9 +172,63 @@ export const BoardProvider = (
     });
   };
 
+  const checkAction = produce((draft: CellRecords, action: CheckAction) => {
+    switch (action.type) {
+      case "check": {
+        if (checkAnyError(draft)) {
+          Alert.alert("Oh no...", "You have made an error");
+          break;
+        }
+        if (draft.some(({ cellData }) => cellData.value === undefined)) {
+          Alert.alert(
+            "You're doing good",
+            "But you have not entered all numbers"
+          );
+          break;
+        }
+
+        Alert.alert("Congratulations", "You have solved the puzzle");
+        break;
+      }
+    }
+  });
+
+  const checkDispatch = (action: CheckAction) => {
+    setState((currentState) => {
+      // don´t record history here, we do not change the board
+      return checkAction(currentState, action);
+    });
+  };
+
+  const solverAction = produceWithPatches(
+    (draft: CellRecords, action: SolverAction) => {
+      switch (action.type) {
+        case "solve": {
+          const solveResult = solveBruteForce(draft);
+          if (solveResult === false) {
+            Alert.alert(
+              "Houston, we have a problem",
+              "This board is not solvable"
+            );
+          } else {
+            draft.forEach((cell) => {
+              cell.cellData = getCell(solveResult, cell.position).cellData;
+            });
+          }
+        }
+      }
+    }
+  );
+
+  const solverDispatch = (action: SolverAction) => {
+    setState((currentState) => {
+      return recordHistory(solverAction, currentState, action);
+    });
+  };
+
   const recordHistory = <
     S extends CellRecords,
-    A extends CellAction | BoardAction,
+    A extends CellAction | BoardAction | SolverAction,
   >(
     actionFn: { (base: S, action: A): readonly [S, Patch[], Patch[]] },
     currentState: S,
@@ -187,7 +248,14 @@ export const BoardProvider = (
 
   return (
     <BoardContext.Provider
-      value={{ cells, cellDispatch, historyDispatch, boardDispatch }}
+      value={{
+        cells,
+        cellDispatch,
+        historyDispatch,
+        boardDispatch,
+        checkDispatch,
+        solverDispatch,
+      }}
     >
       {props.children}
     </BoardContext.Provider>

@@ -91,6 +91,8 @@ export type CellPosition = { rowId: number; columnId: number };
 
 export type CellRecord = { position: CellPosition; cellData: CellData };
 
+export type CellRecords = CellRecord[];
+
 export type RowPosition = { rowId: number };
 
 export type RowData = { cells: Array<CellData> };
