@@ -1,7 +1,8 @@
 import { FiberProvider } from "its-fine";
 import React from "react";
-import { View, ViewStyle } from "react-native";
-import { BoardProvider } from "./board/BoardContext";
+import { Text, View, ViewStyle } from "react-native";
+import { ActivityIndicator } from "react-native-paper";
+import { BoardProvider, useBoardContext } from "./board/BoardContext";
 import { CanvasBoard } from "./board/canvas/CanvasBoard";
 import { DOMBoard } from "./board/dom/DOMBoard";
 import { createSampleBoard } from "./dummy/createSampleBoard";
@@ -13,6 +14,37 @@ const useCanvas = true;
 
 export const Sudoku = () => {
   const board = createSampleBoard();
+
+  return (
+    <FiberProvider>
+      <FontManagerProvider>
+        <FocusProvider>
+          <BoardProvider boardData={board}>
+            <SudokuGame />
+          </BoardProvider>
+        </FocusProvider>
+      </FontManagerProvider>
+    </FiberProvider>
+  );
+};
+
+const SudokuGame = () => {
+  const { isSolving } = useBoardContext();
+
+  if (isSolving) {
+    const solvingScreenStyle: ViewStyle = {
+      alignItems: "center",
+      justifyContent: "center",
+      height: "100%",
+    };
+
+    return (
+      <View style={solvingScreenStyle}>
+        <ActivityIndicator size={"large"} />
+        <Text>Solving</Text>
+      </View>
+    );
+  }
 
   const inputContainer: ViewStyle = {
     flexGrow: 0,
@@ -26,19 +58,13 @@ export const Sudoku = () => {
   };
 
   return (
-    <FiberProvider>
-      <FontManagerProvider>
-        <FocusProvider>
-          <BoardProvider boardData={board}>
-            <View style={boardContainer}>
-              {useCanvas ? <CanvasBoard /> : <DOMBoard />}
-            </View>
-            <View style={inputContainer}>
-              <Input />
-            </View>
-          </BoardProvider>
-        </FocusProvider>
-      </FontManagerProvider>
-    </FiberProvider>
+    <>
+      <View style={boardContainer}>
+        {useCanvas ? <CanvasBoard /> : <DOMBoard />}
+      </View>
+      <View style={inputContainer}>
+        <Input />
+      </View>
+    </>
   );
 };

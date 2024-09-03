@@ -14,7 +14,6 @@ import {
   CellRecords,
   Digit,
 } from "../scheme/BoardData";
-import { solveBruteForce } from "../solver/bruteForce";
 import { checkAnyError } from "../solver/checkError";
 
 type CellAction =
@@ -46,6 +45,8 @@ const BoardContext = createContext<{
   boardDispatch: (action: BoardAction) => void;
   checkDispatch: (action: CheckAction) => void;
   solverDispatch: (action: SolverAction) => void;
+  isSolving: boolean;
+  setIsSolving: (value: boolean) => void;
 } | null>(null);
 
 export const useBoardContext = () => {
@@ -60,6 +61,7 @@ export const BoardProvider = (
   props: PropsWithChildren & { boardData: BoardData }
 ) => {
   const [cells, setState] = useState(buildCells(props.boardData));
+  const [isSolving, setIsSolving] = useState(false);
 
   const undoStack = useRef<{ patches: Patch[]; inversePatches: Patch[] }[]>([]);
   const undoStackPointer = useRef(-1);
@@ -252,6 +254,8 @@ export const BoardProvider = (
         boardDispatch,
         checkDispatch,
         solverDispatch,
+        isSolving,
+        setIsSolving,
       }}
     >
       {props.children}

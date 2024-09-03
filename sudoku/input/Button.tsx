@@ -1,5 +1,5 @@
 import structuredClone from "@ungap/structured-clone";
-import React, { useState } from "react";
+import React from "react";
 import { Alert, Pressable, Text, TextStyle, ViewStyle } from "react-native";
 import { useBoardContext } from "../board/BoardContext";
 import { colors } from "../colors";
@@ -128,8 +128,7 @@ export const CheckButton = () => {
 };
 
 export const SolveButton = () => {
-  const { cells, solverDispatch } = useBoardContext();
-  const [isSolving, setIsSolving] = useState(false);
+  const { cells, solverDispatch, isSolving, setIsSolving } = useBoardContext();
 
   return (
     <Pressable
@@ -142,7 +141,6 @@ export const SolveButton = () => {
             onPress: async () => {
               const inputCells = structuredClone(cells);
               const solved = await solveBruteForce(inputCells);
-              console.log(solved);
               if (solved !== false) {
                 solverDispatch({ type: "solved-board", cells: solved });
               } else {
