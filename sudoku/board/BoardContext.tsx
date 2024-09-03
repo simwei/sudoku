@@ -9,7 +9,6 @@ import React, {
 import { Alert } from "react-native";
 import {
   BoardData,
-  CellData,
   CellPosition,
   CellRecords,
   Digit,
@@ -76,14 +75,12 @@ export const BoardProvider = (
           const cell = getCell(draft, action.position);
 
           if (cell.cellData.type === "editable") {
-            ((cellData: CellData, newDigit: Digit) => {
-              if (cellData.value === newDigit) {
-                // remove value when the same is entered again
-                cellData.value = undefined;
-              } else {
-                cellData.value = newDigit;
-              }
-            })(cell.cellData, action.value);
+            if (cell.cellData.value === action.value) {
+              // remove value when the same is entered again
+              cell.cellData.value = undefined;
+            } else {
+              cell.cellData.value = action.value;
+            }
           }
           break;
         }
@@ -94,16 +91,18 @@ export const BoardProvider = (
           }
           const cell = getCell(draft, action.position);
 
-          if (
-            cell.cellData.type === "editable" &&
-            cell.cellData.value === undefined
-          ) {
-            ((cellData: CellData, key: Digit) => {
-              if (cellData.hints === undefined) {
-                cellData.hints = new Map();
-              }
-              cellData.hints.set(key, !cellData.hints.get(key));
-            })(cell.cellData, action.value);
+          if (cell.cellData.type === "editable") {
+            const hadMainNumber = cell.cellData.value !== undefined;
+
+            cell.cellData.value = undefined;
+
+            if (cell.cellData.hints === undefined) {
+              cell.cellData.hints = new Map();
+            }
+            cell.cellData.hints.set(
+              action.value,
+              hadMainNumber || !cell.cellData.hints.get(action.value)
+            );
           }
           break;
         }
